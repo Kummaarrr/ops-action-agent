@@ -1,0 +1,68 @@
+[project]
+name = "opsagent"
+version = "0.1.0"
+description = "Ops action agent: works a support queue through MCP tools under a written policy, measured for policy violations"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = [
+    "anthropic>=2.3",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "mcp>=1.2",
+    "faker>=30",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.40", "pandas>=2.2"]
+sandbox = ["stripe>=11", "httpx>=0.27"]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-asyncio>=0.24", "ruff>=0.7", "mypy>=1.13", "types-pyyaml"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/opsagent"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# policy text, task templates and prompts are prose: don't wrap them
+"src/opsagent/tasks/templates.py" = ["E501"]
+"src/opsagent/sim/generate.py" = ["E501"]
+"src/opsagent/servers/backend.py" = ["E501"]
+"src/opsagent/servers/mcp_servers.py" = ["E501"]
+"src/opsagent/scoring.py" = ["E501"]
+"src/opsagent/policy/engine.py" = ["E501"]
+"src/opsagent/tasks/generate.py" = ["E501"]
+"src/opsagent/agent/prompts.py" = ["E501"]
+"src/opsagent/agent/guard.py" = ["E501"]
+"src/opsagent/agent/agent.py" = ["E501"]
+"scripts/run_eval.py" = ["E501"]
+"scripts/guard_mutation.py" = ["E501"]
+"scripts/final_table.py" = ["E501"]
+"tests/*" = ["E501"]
+"app/streamlit_app.py" = ["E501"]
+"scripts/build_demo_samples.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["opsagent"]
+mypy_path = "src"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

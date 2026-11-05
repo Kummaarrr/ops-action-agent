@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+data/generated/
+data/cache/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+evals/results/chain.log
+evals/results/chain.done
