@@ -7,7 +7,7 @@ first; risky actions become approval requests instead of actions; replies are sc
 people's data. Measured on 415 pre-registered tasks with known correct end states, including
 adversarial ones, against the baselines a template integration gives you.
 
-**Write-up:** [docs/REPORT.md](docs/REPORT.md) · **Architecture:** [docs/architecture.md](docs/architecture.md) · **Live demo:** _(Streamlit deployment pending)_
+**Write-up:** [docs/REPORT.md](docs/REPORT.md) · **Architecture:** [docs/architecture.md](docs/architecture.md) · **Live demo:** https://ops-action-agent-nctapfw7mfhj26equdjkre.streamlit.app/
 
 ## The story
 
