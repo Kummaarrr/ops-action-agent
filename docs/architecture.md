@@ -56,10 +56,21 @@ closed; untrusted text is delimited; leak checks are normalised; results are rep
 template. The one recommendation not adopted - handling a ticket that bundles several requests
 as several verdicts - is disclosed as a limitation.
 
-## Deployment shape
+## Deployment shape (built in phase 4: `sandbox/`)
 
-The MCP interface is the seam: swap `servers/backend.py` for adapters over the Shopify Admin
-API, Stripe and a helpdesk API (phase 4 runs the same tasks against real sandboxes), replace
-`SimFacts` with reads through those tools, keep the guard, the policy engine and the agent as
-they are. What leaves the client's environment is the ticket text, tool results and the policy,
-sent to the model API; the approval inbox and the audit log stay in their systems.
+The MCP interface is the seam. `sandbox/backend.py` implements the same method surface as
+`servers/backend.py` over the Shopify Admin REST API, Stripe (test mode) and a Zendesk-shaped
+helpdesk API; the five MCP servers take either backend (`OPSAGENT_BACKEND=sandbox`), and the
+guard, the policy engine, the agent and the scorer are unchanged. Two pieces make that
+possible: a **mirror** (`sandbox/mirror.py`), a local SQLite read model in the simulation's
+schema that every adapter call refreshes and that the guard's ownership and output checks, the
+checker and the scorer read; and **live facts** (`sandbox/facts.py`), so the policy engine
+decides on the record as Shopify or Stripe holds it at that moment rather than on a cache.
+What has no counterpart in the real systems stays local and is documented as such in
+`docs/sandboxes.md` (returns as an order tag plus a local RMA, appointments, the knowledge base,
+the approval inbox, the verification ledger). An in-process mock of the endpoints used
+(`sandbox/mock_api.py`), with the system rules the real APIs enforce, runs the whole path
+without credentials; the real-sandbox run needs the owner's test accounts.
+
+What leaves the client's environment is the ticket text, tool results and the policy, sent to
+the model API; the approval inbox and the audit log stay in their systems.

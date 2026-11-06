@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync --group dev --extra app
+      - run: uv sync --group dev --extra app --extra sandbox
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy

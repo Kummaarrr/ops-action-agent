@@ -29,7 +29,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from opsagent.policy.engine import Context, Decision, PolicyEngine, SimFacts
+from opsagent.policy.engine import Context, Decision, Facts, PolicyEngine, SimFacts
 from opsagent.scoring import normalise, verification_echo
 from opsagent.servers.catalog import (
     BY_NAME,
@@ -95,13 +95,20 @@ class GuardState:
 
 class Guard:
     def __init__(
-        self, company: Company, systems: Systems, ticket_id: str, cfg: GuardConfig | None = None
+        self,
+        company: Company,
+        systems: Systems,
+        ticket_id: str,
+        cfg: GuardConfig | None = None,
+        facts: Facts | None = None,
     ) -> None:
         self.company = company
         self.systems = systems
         self.ticket_id = ticket_id
         self.cfg = cfg or GuardConfig()
-        self.engine = PolicyEngine(SimFacts(company))
+        # facts for the policy engine: the simulation's rows, or live reads through sandbox adapters
+        self.facts: Facts = facts if facts is not None else SimFacts(company)
+        self.engine = PolicyEngine(self.facts)
         self.state = GuardState()
         self.schemas: dict[str, dict[str, Any]] = {
             f"{server}.{t['name']}": t["inputSchema"]
@@ -299,7 +306,7 @@ class Guard:
         ), False
 
     def _record_before(self, spec: ToolSpec, args: dict[str, Any]) -> dict[str, Any] | None:
-        facts = SimFacts(self.company)
+        facts = self.facts
         getter = {
             "order_id": facts.order,
             "charge_id": facts.charge,

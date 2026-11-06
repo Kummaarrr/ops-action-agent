@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from opsagent import llm
 from opsagent.agent import prompts
 from opsagent.agent.guard import Guard, GuardConfig
+from opsagent.policy.engine import Facts
 from opsagent.scoring import Report
 from opsagent.servers.client import Systems
 from opsagent.sim.company import Company
@@ -60,10 +61,15 @@ class CheckerVerdict(BaseModel):
 
 
 async def run_task(
-    company: Company, systems: Systems, ticket_id: str, cfg: AgentConfig, api_key: str | None = None
+    company: Company,
+    systems: Systems,
+    ticket_id: str,
+    cfg: AgentConfig,
+    api_key: str | None = None,
+    facts: Facts | None = None,
 ) -> Report:
     start = time.perf_counter()
-    guard = Guard(company, systems, ticket_id, cfg.guard) if cfg.guard else None
+    guard = Guard(company, systems, ticket_id, cfg.guard, facts) if cfg.guard else None
     system = prompts.system_prompt(cfg.policy_in_prompt, guarded=guard is not None)
     messages: list[dict[str, Any]] = [{"role": "user", "content": prompts.task_message(ticket_id)}]
     trace: list[dict[str, Any]] = []

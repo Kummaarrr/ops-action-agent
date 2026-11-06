@@ -1,4 +1,5 @@
-"""The five MCP servers (store, billing, helpdesk, kb, approvals) over the simulated backend.
+"""The five MCP servers (store, billing, helpdesk, kb, approvals) over the simulated backend,
+or over the real sandboxes (OPSAGENT_BACKEND=sandbox; see opsagent.sandbox).
 
 Run one over stdio:  python -m opsagent.servers.mcp_servers store   (OPSAGENT_DB = the .db file)
 
@@ -85,8 +86,8 @@ def _wrap(method: Callable[..., Any], spec: ToolSpec, company: Company) -> Calla
     return tool
 
 
-def build_server(server: str, company: Company) -> MCPServer:
-    backend = Backend(company)
+def build_server(server: str, company: Company, backend: Any | None = None) -> MCPServer:
+    backend = backend if backend is not None else Backend(company)
     mcp = MCPServer(
         f"northwind-{server}",
         instructions=f"Northwind Fitness Co. {server} system. Tools act on live company data.",
@@ -114,7 +115,13 @@ def main() -> None:
     db = os.environ.get("OPSAGENT_DB")
     if not db:
         sys.exit("set OPSAGENT_DB to the company database path")
-    build_server(server, Company(db)).run(transport="stdio")
+    company = Company(db)
+    backend: Any | None = None
+    if os.environ.get("OPSAGENT_BACKEND", "sim") == "sandbox":
+        from opsagent.sandbox.backend import SandboxBackend
+
+        backend = SandboxBackend.from_env(company)  # the mirror is the OPSAGENT_DB file
+    build_server(server, company, backend).run(transport="stdio")
 
 
 if __name__ == "__main__":
